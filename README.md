@@ -12,6 +12,6 @@ A fast, multithreaded subdomain enumeration tool written in Python for ethical h
 ## 🛠️ Usage
 
 ```bash
-$ python subdomain_finder.py
+$ python subdomain_finder.py -d example.com -w wordlist.txt -o results.txt
 Enter target domain (e.g. example.com): scanme.nmap.org
 Enter path to wordlist file: wordlist.txt
