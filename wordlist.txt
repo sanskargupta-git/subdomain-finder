@@ -1,0 +1,9 @@
+www
+mail
+ftp
+admin
+blog
+test
+dev
+cpanel
+webmail
