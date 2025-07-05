@@ -1,10 +1,10 @@
 import socket
 import threading
+import argparse
 
-print_lock = threading.Lock()  # To prevent print conflicts
+print_lock = threading.Lock()
 found_subdomains = []
 
-# Function to resolve subdomain
 def scan_subdomain(domain, subdomain):
     url = f"{subdomain}.{domain}"
     try:
@@ -13,30 +13,37 @@ def scan_subdomain(domain, subdomain):
             print(f"[+] Found: {url} → {ip}")
             found_subdomains.append((url, ip))
     except socket.gaierror:
-        pass  # Ignore if subdomain doesn't resolve
+        pass
 
-# Main function
 def main():
-    domain = input("Enter target domain (e.g. example.com): ")
-    wordlist_file = input("Enter path to wordlist file (e.g. wordlist.txt): ")
+    parser = argparse.ArgumentParser(description="Fast Subdomain Enumerator (Python)")
+    parser.add_argument("-d", "--domain", required=True, help="Target domain (e.g. example.com)")
+    parser.add_argument("-w", "--wordlist", required=True, help="Path to wordlist file")
+    parser.add_argument("-o", "--output", help="Output file to save results (optional)")
+    args = parser.parse_args()
 
     try:
-        with open(wordlist_file, "r") as f:
-            subdomains = f.read().splitlines()
+        with open(args.wordlist, "r") as file:
+            subdomains = file.read().splitlines()
 
-        print(f"\n🔍 Starting Subdomain Scan for: {domain}\n")
+        print(f"\n🔍 Scanning subdomains for: {args.domain}\n")
 
         threads = []
         for sub in subdomains:
-            t = threading.Thread(target=scan_subdomain, args=(domain, sub))
+            t = threading.Thread(target=scan_subdomain, args=(args.domain, sub))
             t.start()
             threads.append(t)
 
         for thread in threads:
             thread.join()
 
-        print("\n✅ Scan Complete.")
-        print(f"Total found: {len(found_subdomains)}")
+        print(f"\n✅ Scan Complete. Found {len(found_subdomains)} subdomains.")
+
+        if args.output:
+            with open(args.output, "w") as f:
+                for sub, ip in found_subdomains:
+                    f.write(f"{sub} → {ip}\n")
+            print(f"📁 Results saved to: {args.output}")
 
     except FileNotFoundError:
         print("❌ Wordlist file not found.")
